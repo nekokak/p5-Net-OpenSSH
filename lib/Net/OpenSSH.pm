@@ -243,6 +243,8 @@ sub new {
     my $sshfs_cmd = _first_defined delete $opts{sshfs_cmd}, 'sshfs';
     my $sftp_server_cmd = _first_defined delete $opts{sftp_server_cmd},
                                          '/usr/lib/openssh/sftp-server';
+
+    my $sudo_ssh = delete $opts{sudo_ssh};
     my $timeout = delete $opts{timeout};
     my $kill_ssh_on_timeout = delete $opts{kill_ssh_on_timeout};
     my $strict_mode = _first_defined delete $opts{strict_mode}, 1;
@@ -333,6 +335,7 @@ sub new {
 		 _perl_pid => $$,
                  _thread_generation => $thread_generation,
                  _ssh_cmd => $ssh_cmd,
+                 _sudo_ssh => $sudo_ssh,
 		 _scp_cmd => $scp_cmd,
 		 _rsync_cmd => $rsync_cmd,
                  _sshfs_cmd => $sshfs_cmd,
@@ -517,6 +520,7 @@ sub _make_ssh_call {
                 '--',
                 (@_ ? "@_" : ()));
     $debug and $debug & 8 and _debug_dump 'call args' => \@args;
+    unshift @args, 'sudo' if $self->{_sudo_ssh};
     @args;
 }
 
